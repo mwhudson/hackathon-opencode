@@ -56,17 +56,33 @@ thousands of lines — the mysql sample in the repo's hackathon directory
 is 18,761. The extractor is designed to give the writer subagent
 everything it needs in well under 1000 lines.
 
-### Step 3 — Delegate the write-up to a Sonnet subagent
+### Step 3 — Delegate the write-up to a subagent
 
-Read `agents/bug-writer.md`. Then invoke the `Agent` tool with:
+Read `agents/bug-writer.md`. Then construct the prompt:
+
+1. The full contents of `agents/bug-writer.md`
+2. Two blank lines
+3. `## Input`
+4. The JSON from step 2
+5. A blank line
+6. `Build URL: <the original URL the user pasted>`
+
+Delegate the write-up using the appropriate tool for your environment:
+
+**Claude Code** — invoke the `Agent` tool:
 
 - **`subagent_type`**: `"general-purpose"`
 - **`model`**: `"sonnet"` (pins the write-up to Sonnet 4.6 for consistent
   quality regardless of the orchestrating model)
+- **`prompt`**: the prompt constructed above
+
+**opencode** — invoke the `Task` tool:
+
+- **`subagent_type`**: `"general"`
 - **`description`**: `"Draft Launchpad bug from buildlog"`
 - **`prompt`**: the full contents of `agents/bug-writer.md`, followed by
   two blank lines, then `## Input`, then the JSON from step 2, then a
-  blank line, then `Build URL: <the original URL the user pasted>`.
+  blank line, then `Build URL: <the original URL the user pasted>`
 
 The subagent returns the formatted `TITLE` / `DESCRIPTION` block as its
 final message.
@@ -93,14 +109,17 @@ appended to the prompt and overwrite the file.
 Three reasons:
 1. **Model pinning.** The orchestrator may be running Opus, Haiku, or a
    non-Anthropic model (e.g. when this repo is used with opencode +
-   OpenRouter). Sonnet 4.6 gives a known, appropriate quality floor for
-   the write-up step.
+   OpenRouter). A dedicated subagent gives a known, appropriate quality
+   floor for the write-up step. Claude Code users get Sonnet 4.6; opencode
+   users configure the model in `.opencode/agents/bug-writer.md`.
 2. **Context isolation.** The subagent only sees the JSON extract, not
    the orchestrator's full conversation. Cleaner input → more reliable
    output, and the orchestrator's context isn't bloated with log data.
 3. **Cost shape.** Sonnet handles the inference comfortably; Opus would
    be more expensive with no quality lift on templated summarization,
-   and Haiku tends to over-claim root causes on log data.
+   and Haiku tends to over-claim root causes on log data. For open-weight
+   models via OpenRouter, pick the best model your budget allows — the
+   subagent config makes this easy to adjust.
 
 ## Reference
 
