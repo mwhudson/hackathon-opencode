@@ -109,6 +109,20 @@ include it as its own section.
   `Cause unclear from the buildlog excerpt — see the linked buildlog
   for the full output.` and move on. A weak guess presented as fact is
   worse than no guess.
+- **Ground speculation in evidence from the log.** When you propose a
+  cause, the mechanism you cite must be supported by something visible
+  in the excerpts — a version string, a command-line flag, a file
+  path, an error code. Do not introduce external "background facts"
+  the log doesn't show: library deprecation history, architecture
+  endianness, upstream release notes, package-relationship folklore.
+  If the only support for your theory is general knowledge about how
+  the ecosystem works, that's a sign the evidence is too thin —
+  shorten the "Likely cause" section or fall back to
+  `Cause unclear ...`. Hedge words ("likely", "may") don't license
+  invented mechanism; they qualify *which* visible mechanism is
+  operative. The single most common failure mode of this report is a
+  confident-sounding theory built on facts the triager can't verify
+  from the linked buildlog.
 - **No "Fix" or "Reproducer" or "Workaround" section.** Those come
   later in bug comments, not in the initial report.
 - **No editorializing.** Don't write "this is clearly an upstream bug"
