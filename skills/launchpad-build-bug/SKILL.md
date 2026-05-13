@@ -71,12 +71,22 @@ Read `agents/bug-writer.md`. Then invoke the `Agent` tool with:
 The subagent returns the formatted `TITLE` / `DESCRIPTION` block as its
 final message.
 
-### Step 4 — Surface the result
+### Step 4 — Save the output to a file
 
-Show the subagent's output to the user **verbatim**. Don't reformat,
-don't add a summary, don't append "let me know if you want changes." If
-the user asks for revisions, run the subagent again with the revision
-request appended to the prompt.
+Write the subagent's output to `./<source_package>_<version>-bug.md` in
+the current working directory, where `<source_package>` and `<version>`
+come from the JSON extract in step 2. Use the `Write` tool — no need to
+shell out. If the file already exists (e.g. the user is re-running on
+the same build), overwrite it.
+
+### Step 5 — Surface the result
+
+Show the subagent's output to the user **verbatim**, then on a final
+line tell them where it was saved (e.g. "Saved to
+`./fprintd_1.94.5-4-bug.md`."). Don't reformat the report, don't add a
+summary, don't append "let me know if you want changes." If the user
+asks for revisions, run the subagent again with the revision request
+appended to the prompt and overwrite the file.
 
 ## Why the subagent
 

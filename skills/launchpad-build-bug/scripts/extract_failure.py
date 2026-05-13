@@ -36,14 +36,34 @@ NOISE_PREFIXES = (
 # (e.g. mysql-test-run runs hundreds of passing tests after a failure), so
 # we grep for these and capture a window of context around each.
 FAILURE_MARKERS = (
+    # mysql-test-run / similar
     re.compile(r"\[ fail \]"),
     re.compile(r"\[ retry-fail \]"),
+    # automake test driver: "FAIL: foo.test"
     re.compile(r"^FAIL: "),
+    # autotest (autotools test suite): "155. time01.at:20:  FAILED (time01.at:23)"
+    re.compile(r":\s+FAILED\b"),
+    # autotest summary: "1 failed unexpectedly."
+    re.compile(r"^\s*\d+ failed unexpectedly\b"),
+    # meson, perl prove, generic
     re.compile(r"\*\*\* ERROR"),
     re.compile(r"^FATAL:"),
-    re.compile(r":\s+error:"),  # gcc/clang style: foo.c:42: error: ...
+    # gcc/clang compile errors: foo.c:42: error: ...
+    re.compile(r":\s+error:"),
+    # dpkg helper tools — only errors. Warnings from dpkg-deb/dpkg-source fire
+    # routinely during sbuild prep (unsigned sources, rootless-build) and
+    # aren't failures.
+    re.compile(r"^dpkg-\w+:\s+error"),
+    # debhelper tool errors elsewhere in the build (not just the cascade)
+    re.compile(r"^dh_\w+:\s+error"),
+    # linker / loader failures
     re.compile(r"undefined reference to"),
     re.compile(r"cannot find -l"),
+    # crashes
+    re.compile(r"\bcore dumped\b"),
+    re.compile(r"Segmentation fault"),
+    # apt / sbuild summary errors
+    re.compile(r"^E:\s+"),
 )
 
 
