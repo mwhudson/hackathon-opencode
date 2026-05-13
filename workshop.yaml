@@ -1,0 +1,11 @@
+name: workshop-openrouter-opencode
+base: ubuntu@24.04
+sdks:
+  - name: opencode
+    channel: latest/stable
+  - name: direnvrc
+    channel: latest/stable
+
+actions:
+  opencode:     direnv exec /project opencode "$@"
+  opencode-run: direnv exec /project opencode run -m openrouter/z-ai/glm-5.1 "$@"
