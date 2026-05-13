@@ -50,12 +50,6 @@ step) and what specifically went wrong. Quote the operative error line
 verbatim — Launchpad triagers grep for these. Use a fenced code block
 for any multi-line excerpt.>
 
-## Build chain
-
-```
-<the build_chain array, one line each, verbatim>
-```
-
 ## Likely cause
 
 <1-3 sentences with your best inference, clearly labelled as a guess
@@ -73,10 +67,21 @@ Avoid speculating about fixes unless they're obvious from the error.>
   *concrete* failure (test name, file:line, undefined symbol). Quote the
   exact error line in a fenced code block when it's short; for multi-line
   errors, use a fenced block. Don't paraphrase error messages — copy them.
-- **Build chain** — verbatim from `build_chain`. Don't trim or reformat.
 - **Likely cause** — earn this section. If the failure is "tests fail and
   I don't know why," say so plainly. A weak guess labelled as fact is
   worse than no guess.
+
+### Why no "Build chain" section
+
+The JSON extract carries a `build_chain` field with the `make[N]: ***`
+cascade and the final `dpkg-buildpackage: error` line. We deliberately
+*don't* surface that as its own section in the report. In practice it's
+always one of three boilerplate shapes (dh_auto_configure / dh_auto_build
+/ dh_auto_test failed, then standard make cascade, then dpkg-buildpackage
+error) and the **Failure** section already names which step broke. The
+cascade is still useful internally — if it points at a specific
+`debian/rules` target the failure section didn't already name, fold that
+detail into **Failure** rather than adding a section for it.
 
 ## What to avoid
 
@@ -143,16 +148,6 @@ summary:
 # SKIP:  4
 # XFAIL: 2
 # FAIL:  1
-```
-
-## Build chain
-
-```
-make[5]: *** [Makefile:2072: test-suite.log] Error 1
-make[4]: *** [Makefile:2207: check-TESTS] Error 2
-make[2]: *** [Makefile:1958: check-recursive] Error 1
-dh_auto_test: error: make -j4 check ... returned exit code 2
-dpkg-buildpackage.pl: error: debian/rules binary subprocess failed with exit status 2
 ```
 
 ## Likely cause

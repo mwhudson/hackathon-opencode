@@ -81,17 +81,19 @@ Use this skeleton exactly. The headings are fixed; the prose adapts.
 step) and what specifically went wrong. Quote the operative error line
 verbatim in a fenced code block — Launchpad triagers grep for these.>
 
-## Build chain
-
-```
-<every line from build_chain, in order, verbatim>
-```
-
 ## Likely cause
 
 <1–3 sentences with your best inference, clearly labelled as a guess.
 If the evidence is thin, say so plainly.>
 ```
+
+The JSON extract also contains a `build_chain` array (the `make[N]: ***`
+cascade and `dpkg-buildpackage: error` line). We don't surface it in the
+report — it's almost always the same boilerplate cascade and doesn't add
+information beyond what the **Failure** section already conveys. Use it
+internally if the cascade reveals something unusual (e.g. it points at a
+specific debian/rules target the failure didn't already name), but don't
+include it as its own section.
 
 ## Rules
 
@@ -118,9 +120,8 @@ If the evidence is thin, say so plainly.>
 
 If the JSON describes the `mysql-8.4` failure where two
 `main.myisam_explain_json_non_select_*` tests fail because
-`perl validate_json.pl` errors out (exit 256, errno 2), and the build
-chain shows `make[1]: *** [debian/rules:166: override_dh_auto_test]
-Error 1`, the right output is roughly:
+`perl validate_json.pl` errors out (exit 256, errno 2), the right output
+is roughly:
 
 ```
 TITLE
@@ -150,15 +151,6 @@ exec of 'perl /<<PKGBUILDDIR>>/mysql-test/suite/opt_trace/validate_json.pl ...' 
 
 The EXPLAIN JSON the test produces looks well-formed, so the failure is
 on the validator side, not the SUT side.
-
-## Build chain
-
-```
-make[1]: *** [debian/rules:166: override_dh_auto_test] Error 1
-make[1]: Leaving directory '/<<PKGBUILDDIR>>'
-make: *** [debian/rules:231: build-arch] Error 2
-dpkg-buildpackage.pl: error: debian/rules build-arch subprocess failed with exit status 2
-```
 
 ## Likely cause
 

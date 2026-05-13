@@ -64,6 +64,20 @@ FAILURE_MARKERS = (
     re.compile(r"Segmentation fault"),
     # apt / sbuild summary errors
     re.compile(r"^E:\s+"),
+    # CMake config errors. CMake dumps its full CMakeCache.txt to stdout on
+    # configuration failure (often hundreds of lines), so the actual error
+    # message tends to scroll out of the tail window — grep for it directly.
+    re.compile(r"^CMake Error\b"),
+    # meson configure error block header
+    re.compile(r"^meson\.build:\d+:\d+: ERROR"),
+)
+
+# Sentinel lines marking the start of dumps we don't want in the tail. CMake's
+# debhelper integration tails the entire CMakeCache.txt on failure (~hundreds
+# of lines of cache keys), which dilutes the tail with content that isn't the
+# error.
+TAIL_TRUNCATE_MARKERS = (
+    "==> CMakeCache.txt <==",
 )
 
 
@@ -202,7 +216,20 @@ def find_failure_excerpts(lines: list[str], cascade_start: int) -> list[str]:
 
 
 def trim_tail(lines: list[str]) -> list[str]:
-    """Drop the noisy 'PROCESS MEMORY HOGS' and SUMMARY block tails."""
+    """Drop noisy block dumps from the tail.
+
+    - 'PROCESS MEMORY HOGS' block from mysql-style builds (huge cc1/ld lines).
+    - CMakeCache.txt dump that debhelper's CMake helper tails on configure
+      failure — the actual error is *above* the dump, the dump is just noise.
+    """
+    # If a truncate marker appears in the tail, cut the tail there. The cascade
+    # is appended downstream as `build_chain` anyway, so we don't lose the
+    # final make errors.
+    for i, line in enumerate(lines):
+        if any(marker in line for marker in TAIL_TRUNCATE_MARKERS):
+            lines = lines[:i] + [f"[... {len(lines) - i} lines of CMakeCache.txt dump elided ...]"]
+            break
+
     out = []
     for line in lines:
         stripped = line.rstrip()
