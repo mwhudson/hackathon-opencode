@@ -30,8 +30,13 @@ Classify the failure into one of these categories:
 - **Toolchain issue**: autopkgtest, cross-build, dpkg-shlibdeps warnings
 - **Infrastructure**: out of disk space, OOM killed, network fetch failed
 
-### 4. Search for existing bug in launchpad.net
-
+### 4. Search for existing bug and upstream fix
+- Search Launchpad (`launchpad.net`) for existing bugs against the source package
+- Search Debian BTS (`bugs.debian.org`) for existing reports
+- Search upstream repository (GitHub, Codeberg, GitLab, srcbox, etc.) for related commits or issues
+- Use web search to find patches (e.g. Linux From Scratch patches, Fedora fixes)
+- If the package is unmaintained upstream, note this explicitly
+- Cross-reference: check if the same failure pattern appears in other packages (shared root cause)
 
 ### 5. Write Bug Report / Summary
 Produce a concise report with:
@@ -39,8 +44,17 @@ Produce a concise report with:
 - **Build environment**: distro version, architecture, toolchain versions if known
 - **Relevant log excerpt**: The smallest snippet showing the actual failure (≤50 lines)
 - **Analysis**: Why it failed and what category it falls into
-- **Suggested fix**: Concrete next step (add dependency, patch code, skip test, etc.)
+- **Existing bugs**: Links to any existing Launchpad/Debian/upstream bugs or commits found
+- **Suggested fix**: Concrete next step (add dependency, patch code, sync from Debian, skip test, etc.)
 - **Severity**: FTBFS (Fails To Build From Source) classification if applicable
+
+### Common failure patterns in Ubuntu/Debian
+Keep an eye out for these recurring systemic issues:
+- **glibc 2.43 / ISO C23**: `strchr()`, `strrchr()`, `memchr()` now return `const` pointers. Look for `-Werror=discarded-qualifiers` errors.
+- **GCC 15 / `-Wincompatible-pointer-types`**: Old K&R C function pointers `()` with no prototype now error when assigned to modern prototypes.
+- **Packaging regressions**: Header files moved between binary packages (e.g. `gkrellm-visibility.h` moved from `gkrellmd` to `gkrellm`).
+- **Missing dependencies**: Build-depends not declared, or transitions changed package names.
+- **Test failures**: Root-required tests, flaky tests, tests depending on external services.
 
 ### Style Notes
 - Be terse but precise. Distribution maintainers don't have time for essays.
